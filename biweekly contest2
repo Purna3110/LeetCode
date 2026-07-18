@@ -1,0 +1,14 @@
+class Solution:
+    def rearrangeString(self, s: str, x: str, y: str) -> str:
+        y1=[]
+        other=[]
+        x1=[]
+        for i in s:
+            if i==y:
+                y1.append(i)
+            elif i==x:
+                x1.append(i)
+            else:
+                other.append(i)
+        return "".join(y1+other+x1)
+        
