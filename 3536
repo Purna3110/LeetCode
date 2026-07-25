@@ -1,0 +1,17 @@
+class Solution:
+    def maxProduct(self, n: int) -> int:
+        arr=[]
+        arr1=[]
+        for i in range(len(str(n))):
+            arr.append(n%10)
+            n=n//10
+        for j in range(len(arr)):
+            for k in range(j+1,len(arr)):
+                arr1.append(arr[j]*arr[k])
+        return max(arr1)
+        
+
+        
+
+
+        
