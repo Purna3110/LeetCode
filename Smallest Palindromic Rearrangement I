@@ -1,0 +1,14 @@
+class Solution:
+    def smallestPalindrome(self, s: str) -> str:
+        left = ""
+        middle = ""
+
+        for ch in sorted(set(s)):
+            count = s.count(ch)
+
+            left += ch * (count // 2)
+
+            if count % 2:
+                middle = ch
+
+        return left + middle + left[::-1]
