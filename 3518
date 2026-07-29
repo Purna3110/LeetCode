@@ -1,0 +1,55 @@
+class Solution:
+    def smallestPalindrome(self, s: str, k: int) -> str:
+        freq = Counter(s)
+
+        half = [0] * 26
+        mid = ""
+
+        for ch, cnt in freq.items():
+            if cnt % 2:
+                mid = ch
+            half[ord(ch) - 97] = cnt // 2
+
+        LIMIT = 10**6 + 1
+
+        def count_perm(cnts):
+            total = sum(cnts)
+            rem = total
+            res = 1
+
+            for c in cnts:
+                if c == 0:
+                    continue
+                ways = comb(rem, c)
+                if res > LIMIT // ways:
+                    return LIMIT
+                res *= ways
+                if res >= LIMIT:
+                    return LIMIT
+                rem -= c
+
+            return res
+
+        if count_perm(half) < k:
+            return ""
+
+        left = []
+        length = sum(half)
+
+        for _ in range(length):
+            for i in range(26):
+                if half[i] == 0:
+                    continue
+
+                half[i] -= 1
+                ways = count_perm(half)
+
+                if ways >= k:
+                    left.append(chr(i + 97))
+                    break
+                else:
+                    k -= ways
+                    half[i] += 1
+
+        left = "".join(left)
+        return left + mid + left[::-1]
