@@ -1,0 +1,16 @@
+class Solution:
+    def minimumPushes(self, word: str) -> int:
+        # Step 1: Count letter frequencies
+        counts = Counter(word)
+        
+        # Step 2: Sort frequencies in descending order
+        sorted_freqs = sorted(counts.values(), reverse=True)
+        
+        total_pushes = 0
+        
+        # Step 3 & 4: Map frequencies to key positions
+        for i, freq in enumerate(sorted_freqs):
+            pushes = (i // 8) + 1  # 1 push for first 8, 2 for next 8, etc.
+            total_pushes += freq * pushes
+            
+        return total_pushes
