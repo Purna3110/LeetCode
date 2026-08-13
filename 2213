@@ -1,0 +1,142 @@
+class SegmentTree:
+    def __init__(self, s):
+        self.n = len(s)
+        size = 4 * self.n
+
+        self.left = [''] * size
+        self.right = [''] * size
+
+        self.prefix = [0] * size
+        self.suffix = [0] * size
+        self.best = [0] * size
+
+        self.length = [0] * size
+
+        self.build(1, 0, self.n - 1, s)
+
+    def build(self, node, l, r, s):
+        self.length[node] = r - l + 1
+
+        if l == r:
+            self.left[node] = s[l]
+            self.right[node] = s[l]
+
+            self.prefix[node] = 1
+            self.suffix[node] = 1
+            self.best[node] = 1
+
+            return
+
+        mid = (l + r) // 2
+
+        self.build(node * 2, l, mid, s)
+        self.build(node * 2 + 1, mid + 1, r, s)
+
+        self.merge(node)
+
+    def merge(self, node):
+        L = node * 2
+        R = node * 2 + 1
+
+        # Character at extreme ends
+        self.left[node] = self.left[L]
+        self.right[node] = self.right[R]
+
+        # -----------------
+        # PREFIX
+        # -----------------
+        self.prefix[node] = self.prefix[L]
+
+        if (
+            self.left[L] == self.left[R]
+            and self.prefix[L] == self.length[L]
+        ):
+            self.prefix[node] = self.length[L] + self.prefix[R]
+
+        # -----------------
+        # SUFFIX
+        # -----------------
+        self.suffix[node] = self.suffix[R]
+
+        if (
+            self.right[L] == self.right[R]
+            and self.suffix[R] == self.length[R]
+        ):
+            self.suffix[node] = self.length[R] + self.suffix[L]
+
+        # -----------------
+        # BEST
+        # -----------------
+        self.best[node] = max(
+            self.best[L],
+            self.best[R]
+        )
+
+        # Join suffix of left + prefix of right
+        if self.right[L] == self.left[R]:
+            self.best[node] = max(
+                self.best[node],
+                self.suffix[L] + self.prefix[R]
+            )
+
+    def update(self, node, l, r, index, char):
+
+        if l == r:
+            self.left[node] = char
+            self.right[node] = char
+
+            self.prefix[node] = 1
+            self.suffix[node] = 1
+            self.best[node] = 1
+
+            return
+
+        mid = (l + r) // 2
+
+        if index <= mid:
+            self.update(
+                node * 2,
+                l,
+                mid,
+                index,
+                char
+            )
+        else:
+            self.update(
+                node * 2 + 1,
+                mid + 1,
+                r,
+                index,
+                char
+            )
+
+        self.merge(node)
+
+
+class Solution:
+    def longestRepeating(
+        self,
+        s: str,
+        queryCharacters: str,
+        queryIndices: list[int]
+    ) -> list[int]:
+
+        tree = SegmentTree(s)
+
+        ans = []
+
+        for char, index in zip(
+            queryCharacters,
+            queryIndices
+        ):
+            tree.update(
+                1,
+                0,
+                len(s) - 1,
+                index,
+                char
+            )
+
+            ans.append(tree.best[1])
+
+        return ans
