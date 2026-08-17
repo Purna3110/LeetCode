@@ -1,0 +1,70 @@
+from typing import List
+
+class Solution:
+    def stoneGameV(self, stoneValue: List[int]) -> int:
+        n = len(stoneValue)
+
+        prefix = [0] * (n + 1)
+
+        for i in range(n):
+            prefix[i + 1] = prefix[i] + stoneValue[i]
+
+        dp = [[0] * n for _ in range(n)]
+
+        right_ptr = list(range(n))
+        best_right = [0] * n
+
+        for l in range(n - 2, -1, -1):
+
+            left_ptr = l - 1
+            best_left = 0
+
+            for r in range(l + 1, n):
+
+                total = prefix[r + 1] - prefix[l]
+
+                # Find balance point
+                while left_ptr + 1 <= r - 1:
+                    next_left = prefix[left_ptr + 2] - prefix[l]
+
+                    if 2 * next_left <= total:
+                        left_ptr += 1
+                        best_left = max(
+                            best_left,
+                            next_left + dp[l][left_ptr]
+                        )
+                    else:
+                        break
+
+                # Right side: strictly smaller right sum
+                target = max(left_ptr + 1, l)
+
+                while right_ptr[r] > target:
+                    right_ptr[r] -= 1
+
+                    k = right_ptr[r]
+
+                    right_sum = prefix[r + 1] - prefix[k + 1]
+
+                    best_right[r] = max(
+                        best_right[r],
+                        right_sum + dp[k + 1][r]
+                    )
+
+                best = max(best_left, best_right[r])
+
+                # Equal sums
+                if left_ptr >= l:
+                    left_sum = prefix[left_ptr + 1] - prefix[l]
+                    right_sum = total - left_sum
+
+                    if left_sum == right_sum:
+                        best = max(
+                            best,
+                            left_sum + dp[l][left_ptr],
+                            right_sum + dp[left_ptr + 1][r]
+                        )
+
+                dp[l][r] = best
+
+        return dp[0][n - 1]
