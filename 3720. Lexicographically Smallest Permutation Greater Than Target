@@ -1,0 +1,45 @@
+class Solution:
+    def lexGreaterPermutation(self, s: str, target: str) -> str:
+        n = len(s)
+
+        # Step 1: Count how many times each character appears in 's'
+        freq = {}
+        for char in "abcdefghijklmnopqrstuvwxyz":
+            freq[char] = 0
+        for char in s:
+            freq[char] += 1
+
+        # Step 2: Match as many characters with 'target' as possible from left to right
+        matched = 0
+        while matched < n and freq[target[matched]] > 0:
+            freq[target[matched]] -= 1
+            matched += 1
+
+        # Step 3: Try to find the first place to place a larger character
+        for i in range(matched, -1, -1):
+            if i < n:
+                # Look for the smallest available character strictly greater than target[i]
+                for char_code in range(ord(target[i]) + 1, ord("z") + 1):
+                    ch = chr(char_code)
+
+                    if freq[ch] > 0:
+                        # Use this character
+                        freq[ch] -= 1
+
+                        # Build the result:
+                        # 1. Matched prefix
+                        # 2. The chosen larger character
+                        # 3. All remaining characters in alphabetical order
+                        ans = target[:i] + ch
+                        for letter in "abcdefghijklmnopqrstuvwxyz":
+                            ans += letter * freq[letter]
+
+                        return ans
+
+            # If we cannot place a larger character at index i,
+            # backtrack by putting the previous matched character back
+            if i > 0:
+                prev_char = target[i - 1]
+                freq[prev_char] += 1
+
+        return ""
