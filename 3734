@@ -1,0 +1,112 @@
+class Solution:
+    def lexPalindromicPermutation(self, s: str, target: str) -> str:
+
+        n = len(s)
+
+        # Count characters in s
+        count = [0] * 26
+
+        for ch in s:
+            count[ord(ch) - ord('a')] += 1
+
+        # Check if palindrome is possible
+        odd = 0
+        middle = ""
+
+        for i in range(26):
+            if count[i] % 2 == 1:
+                odd += 1
+                middle = chr(i + ord('a'))
+
+        if odd > 1:
+            return ""
+
+        # Characters available for the left half
+        half_count = [x // 2 for x in count]
+
+        m = n // 2
+
+        # Only the first half of target matters initially
+        target_half = target[:m]
+
+        # -----------------------------------
+        # Case 1: Try target_half exactly
+        # -----------------------------------
+
+        needed = [0] * 26
+
+        for ch in target_half:
+            needed[ord(ch) - ord('a')] += 1
+
+        possible = True
+
+        for i in range(26):
+            if needed[i] > half_count[i]:
+                possible = False
+                break
+
+        if possible:
+            left = target_half
+            palindrome = left + middle + left[::-1]
+
+            if palindrome > target:
+                return palindrome
+
+        # -----------------------------------
+        # Case 2: Find smallest half > target_half
+        # -----------------------------------
+
+        # prefix_count = characters used by target_half[:i]
+        prefix_count = [0] * 26
+
+        for ch in target_half:
+            prefix_count[ord(ch) - ord('a')] += 1
+
+        # Try changing a position from right to left
+        for i in range(m - 1, -1, -1):
+
+            # Remove target_half[i]
+            x = ord(target_half[i]) - ord('a')
+            prefix_count[x] -= 1
+
+            # Check whether target_half[:i] can be formed
+            possible = True
+
+            for c in range(26):
+                if prefix_count[c] > half_count[c]:
+                    possible = False
+                    break
+
+            if not possible:
+                continue
+
+            # Try the smallest character greater than target_half[i]
+            for c in range(x + 1, 26):
+
+                if prefix_count[c] < half_count[c]:
+
+                    # We found the character to increase
+                    remaining = half_count[:]
+
+                    # Remove prefix characters
+                    for k in range(26):
+                        remaining[k] -= prefix_count[k]
+
+                    # Remove the chosen character
+                    remaining[c] -= 1
+
+                    # Build smallest suffix
+                    suffix = ""
+
+                    for k in range(26):
+                        suffix += chr(k + ord('a')) * remaining[k]
+
+                    # Build the left half
+                    left = target_half[:i] + chr(c + ord('a')) + suffix
+
+                    # Build palindrome
+                    palindrome = left + middle + left[::-1]
+
+                    return palindrome
+
+        return ""
